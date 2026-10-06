@@ -59,7 +59,8 @@ def _simulate(strategy_paths: list[Path], scenario_paths: list[Path], config: Pa
         results += run_scenario(scenario, engine, _log)
 
     count = "1 scenario" if len(scenarios) == 1 else f"{len(scenarios)} scenari"
-    print(f"\n=== Riepilogo su {count} (commissione {settings.commission:.0%}) ===")
+    commission = f"{settings.commission * 100:g}".replace(".", ",")
+    print(f"\n=== Riepilogo su {count} (commissione {commission}%) ===")
     width = max(len(s.label) for s in strategies)
     for strategy in strategies:
         if not strategy.enabled:

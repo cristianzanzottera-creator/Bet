@@ -6,6 +6,7 @@
 #   punteggio   set conclusi e set in corso, es. "4-6 0-2"; punti a parte, es. punti: "15-40"
 #   servizio    chi serve (A o B): basta indicarlo una volta, poi si alterna da solo
 #   quote       "back/lay @ €back/€lay" per giocatore
+#   volume      € abbinati in totale sul mercato (volumi da exchange italiano)
 
 partita:
   mercato_id: "1.900000001"
@@ -21,7 +22,7 @@ eventi:
     quote:
       A: "1.55/1.56 @ 900/1200"
       B: "2.80/2.82 @ 700/650"
-    volume: 85000
+    volume: 6500
     nota: prematch, Rossi favorita
 
   - t: 0
@@ -34,6 +35,7 @@ eventi:
     quote:
       A: "2.10/2.12 @ 400/350"
       B: "1.90/1.91 @ 380/420"
+    volume: 8200
     nota: Bianchi vince il primo set 6-4
 
   - t: "44:00"
@@ -41,25 +43,29 @@ eventi:
     quote:
       A: "3.40/3.45 @ 30/90"
       B: "1.41/1.42 @ 500/300"
-    nota: break di Bianchi, ma alla quota migliore ci sono solo 30 €
+    volume: 8900
+    nota: break di Bianchi
 
   - t: "44:40"
     punti: "0-15"
     quote:
       A: "3.45/3.50 @ 140/60"
       B: "1.40/1.41 @ 420/500"
+    volume: 10400
 
   - t: "50:00"
     punteggio: "4-6 2-3"
     quote:
       A: "3.10/3.15 @ 200/150"
       B: "1.47/1.48 @ 300/350"
+    volume: 11800
 
   - t: "54:00"
     punteggio: "4-6 3-3"
     quote:
       A: "2.20/2.22 @ 600/450"
       B: "1.82/1.83 @ 500/400"
+    volume: 13500
     nota: controbreak di Rossi
 
   - t: "1:20:00"
@@ -67,6 +73,7 @@ eventi:
     quote:
       A: "1.60/1.61 @ 800/700"
       B: "2.62/2.64 @ 500/600"
+    volume: 18000
     nota: Rossi vince il secondo set
 
   - t: "1:52:00"

@@ -52,7 +52,7 @@ def test_cli_check_and_simulate(capsys):
     args = ["simula", str(ROOT / "strategie"), "--scenario", str(ROOT / "scenari"), "--config", str(ROOT / "config.yaml")]
     assert main(args) == 0
     out = capsys.readouterr().out
-    assert "Riepilogo su 2 scenari" in out
+    assert "Riepilogo su 2 scenari (commissione 4,5%)" in out
     assert "ABBINATO BACK 10.00 € @ 3.45" in out
 
 

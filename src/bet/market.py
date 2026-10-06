@@ -7,6 +7,11 @@ from dataclasses import dataclass, field
 from .tennis import TennisScore
 
 
+def eur(amount: float) -> str:
+    """Importo arrotondato all'euro, con il punto delle migliaia: 12.500 €."""
+    return f"{amount:,.0f} €".replace(",", ".")
+
+
 @dataclass(frozen=True)
 class RunnerBook:
     """Migliori prezzi di un giocatore (selezione) sul mercato."""
@@ -32,6 +37,7 @@ class MarketBook:
     status: str = "OPEN"
     """OPEN, SUSPENDED o CLOSED."""
     total_matched: float = 0.0
+    """€ abbinati in totale sul mercato (totalMatched di Betfair)."""
     bet_delay: float = 0.0
     """Secondi di attesa prima che un ordine entri nel mercato (betDelay di Betfair, in-play)."""
 

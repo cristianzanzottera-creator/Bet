@@ -1,6 +1,6 @@
 # La tua idea, così come l'hai descritta:
 # "mi aspetto rimonta in WTA: quando una delle due va sotto di un set e un break,
-#  entra alla migliore quota se la liquidità è almeno X".
+#  entra alla migliore quota se la liquidità del mercato è almeno X".
 
 nome: Rimonta WTA — sotto di un set e un break
 andamento: >
@@ -21,7 +21,8 @@ quando: set_sotto >= 1 e break_sotto >= 1
 ingresso:
   lato: BACK
   prezzo: migliore                # prende la migliore quota disponibile
-  liquidita_minima: 50            # € a quella quota; se sono meno aspetta
+  liquidita_minima: 10000         # € abbinati in totale sul mercato; se sono meno aspetta
+  # liquidita_minima_quota: 50    # facoltativo: € disponibili alla migliore quota
   puntata: 10                     # €
   annulla_non_abbinato_dopo: 15   # secondi
   max_ingressi_per_match: 1

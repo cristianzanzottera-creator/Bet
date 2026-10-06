@@ -18,7 +18,8 @@ quando: >
 ingresso:
   lato: BACK
   prezzo: migliore
-  liquidita_minima: 100
+  liquidita_minima: 8000               # € abbinati in totale sul mercato
+  liquidita_minima_quota: 50           # e almeno 50 € disponibili alla migliore quota
   puntata: 2
   tipo_puntata: percentuale_bankroll   # 2% del bankroll indicato in config.yaml
   annulla_non_abbinato_dopo: 15

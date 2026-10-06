@@ -12,7 +12,7 @@ from .broker import Cancelled, Fill, Order, PaperBroker
 from .config import Settings
 from .context import build_context
 from .expr import Expression, ExpressionError
-from .market import MarketBook, Match
+from .market import MarketBook, Match, eur
 from .position import Position
 from .strategy import Entry, Strategy
 from .tennis import TennisScore
@@ -160,11 +160,19 @@ class Engine:
             if price is None:
                 self._note(key, "quota", now, f"{who}: condizione vera ma nessuna quota {entry.side} disponibile")
                 continue
-            if size < entry.min_liquidity:
+            volume = match.book.total_matched if match.book else 0.0
+            if volume < entry.min_market_volume:
+                self._note(
+                    key, "volume", now,
+                    f"{who}: condizione vera, ma sul mercato sono abbinati solo {eur(volume)} "
+                    f"(minimo {eur(entry.min_market_volume)}): attendo",
+                )
+                continue
+            if size < entry.min_price_liquidity:
                 self._note(
                     key, "liquidita", now,
-                    f"{who}: condizione vera, ma a {price:.2f} ci sono solo {size:.0f} € "
-                    f"(minimo {entry.min_liquidity:g} €): attendo",
+                    f"{who}: condizione vera, ma a {price:.2f} ci sono solo {eur(size)} "
+                    f"(minimo {eur(entry.min_price_liquidity)}): attendo",
                 )
                 continue
             ticks = entry.improve_ticks if entry.side == "BACK" else -entry.improve_ticks
@@ -193,7 +201,7 @@ class Engine:
             self.log(
                 now,
                 f"{who}: ORDINE {entry.side} {stake:.2f} € @ {target:.2f} "
-                f"(liquidità {size:.0f} €, {timing}) — condizione: {s.when.source}",
+                f"(mercato {eur(volume)} abbinati, {eur(size)} alla quota, {timing}) — condizione: {s.when.source}",
             )
             return
 

@@ -21,7 +21,7 @@ pytest
 ## Scrivere una strategia
 
 Esempio: *"mi aspetto la rimonta in WTA. Quando una delle due va sotto di un set e un break,
-entra alla quota migliore se ci sono almeno 50 € disponibili"*.
+entra alla quota migliore se sul mercato sono abbinati almeno 10.000 €"*.
 
 ```yaml
 nome: Rimonta WTA — sotto di un set e un break
@@ -38,7 +38,7 @@ quando: set_sotto >= 1 e break_sotto >= 1
 ingresso:
   lato: BACK
   prezzo: migliore
-  liquidita_minima: 50
+  liquidita_minima: 10000                  # € abbinati in totale sul mercato
   puntata: 10
 
 uscita:                                    # facoltativa
@@ -63,7 +63,8 @@ italiano di quello che la strategia farà: rileggila prima di usarla.
 | `quando` | condizione di ingresso (vedi sotto) | obbligatorio |
 | `ingresso.lato` | `BACK` (punti sul giocatore) o `LAY` (banchi il giocatore) | `BACK` |
 | `ingresso.prezzo` | `migliore` = prende la quota migliore disponibile; `migliore+N` = chiede N tick in più e resta in attesa | `migliore` |
-| `ingresso.liquidita_minima` | € che devono esserci alla quota migliore, altrimenti aspetta | `0` |
+| `ingresso.liquidita_minima` | € abbinati in totale sul mercato (l'"abbinato" che mostra Betfair): sotto questa soglia la strategia aspetta | `0` |
+| `ingresso.liquidita_minima_quota` | € che devono essere disponibili alla quota migliore, per non restare abbinati solo in parte | `0` |
 | `ingresso.puntata` | importo | obbligatorio |
 | `ingresso.tipo_puntata` | `fissa` (€), `percentuale_bankroll` (% del bankroll in `config.yaml`), `responsabilita` (€ di perdita massima: per il LAY calcola la puntata) | `fissa` |
 | `ingresso.annulla_non_abbinato_dopo` | secondi dopo i quali la parte non abbinata viene annullata (`0` = abbina subito quello che c'è e annulla il resto) | `10` |
@@ -78,8 +79,8 @@ italiano di quello che la strategia farà: rileggila prima di usarla.
   quindi `set_sotto >= 1 e break_sotto >= 1`, e la strategia entra sul giocatore per cui la
   condizione è vera.
 - **A ogni aggiornamento.** La condizione non deve diventare vera in un istante preciso: basta
-  che lo sia. Se è vera ma la liquidità alla quota migliore è sotto il minimo, la strategia
-  aspetta e riprova al prossimo aggiornamento.
+  che lo sia. Se è vera ma il mercato non ha ancora il volume minimo (o alla quota migliore c'è
+  meno di `liquidita_minima_quota`), la strategia aspetta e riprova al prossimo aggiornamento.
 - **Dati mancanti = falso.** Se un dato non c'è (punteggio non ancora disponibile, servizio non
   fornito dal feed, nessuna quota) la condizione è falsa. Così non si entra mai "al buio".
 - **Ritardo in-play.** In gioco Betfair trattiene gli ordini per alcuni secondi prima di
@@ -176,6 +177,7 @@ eventi:
     punteggio: "4-6 0-2"
     punti: "0-15"
     quote: {A: "3.40/3.45 @ 30/90"}
+    volume: 8900                # € abbinati sul mercato
   - t: "1:52:00"
     vincitore: A
 ```
@@ -197,21 +199,30 @@ stimare il rendimento.
 
 ## Verso il live
 
-1. **Accesso API Betfair**: app key (quella "delayed" basta per sviluppare) e login con
-   certificato. Le credenziali restano fuori dal repository. Va scelto l'exchange (betfair.it
-   o .com): la liquidità è diversa.
-2. **Adattatore Betfair**: lo stream delle quote (Exchange Stream API) viene convertito in
-   `MarketBook`, con il `betDelay` letto dalla definizione del mercato. Gli ordini del
-   `PaperBroker` diventano ordini limite reali. Il motore e le strategie restano gli stessi.
-   Base consigliata: `betfairlightweight` / `flumine`.
-3. **Feed dei punteggi tennis**: è la scelta più delicata. Le regole su set e break dipendono
-   da un punteggio punto per punto, con il servizio, affidabile e veloce. Il mercato si muove
-   prima del tuo feed: le strategie come la rimonta non sono una gara di velocità, ma un feed
-   lento significa entrare a quote già peggiorate. Le opzioni (fornitori a pagamento, servizi
-   di Betfair) vanno valutate per copertura WTA/ATP/ITF, latenza e costo.
-4. **Registrazione**: ogni partita seguita (quote e punteggi) va salvata nel formato scenario,
+L'exchange di riferimento è **betfair.it** (commissione 4,5% sulle vincite nette di ogni
+mercato, puntata minima 2 €: verificali sul tuo conto e aggiorna `config.yaml`). La sua
+liquidità è separata da quella di betfair.com e in genere molto più bassa: il filtro
+`liquidita_minima` e puntate contenute contano più che altrove.
+
+1. **Accesso API**: app key (quella "delayed" basta per sviluppare) e login non interattivo con
+   certificato su `identitysso-cert.betfair.it`. Dopo il login, le chiamate di betting e lo
+   stream delle quote usano gli stessi indirizzi di betfair.com (`api.betfair.com`,
+   `stream-api.betfair.com:443`) e restituiscono i mercati italiani. Le credenziali restano
+   fuori dal repository.
+2. **Adattatore Betfair**: lo stream delle quote viene convertito in `MarketBook`, con il volume
+   abbinato (`totalMatched`) e il `betDelay` letti dal mercato. Gli ordini del `PaperBroker`
+   diventano ordini limite reali. Il motore e le strategie restano gli stessi. Base
+   consigliata: `betfairlightweight` / `flumine`.
+3. **Feed dei punteggi tennis**: serve punto per punto, con il servizio, in push (WebSocket).
+   I dati più veloci sono quelli ufficiali raccolti in campo (WTA: Stats Perform; ATP e
+   Challenger: Sportradar), venduti soprattutto ai bookmaker: sono quelli che muovono il
+   mercato. Tra i fornitori accessibili la latenza dichiarata non basta, va misurata.
+4. **Misura del ritardo**: si registrano in parallelo lo stream Betfair e il feed candidato.
+   Ogni break produce un salto di quota sul mercato; il tempo tra il salto e l'arrivo del break
+   nel feed è il ritardo reale del feed. Si sceglie il feed con il ritardo più basso e stabile.
+5. **Registrazione**: ogni partita seguita (quote e punteggi) va salvata nel formato scenario,
    così si possono provare le strategie su partite vere e non solo su scenari inventati.
-5. **Gradualità**: prima settimane di paper trading sul mercato reale, poi puntate minime, con
+6. **Gradualità**: prima settimane di paper trading sul mercato reale, poi puntate minime, con
    un limite di perdita giornaliera e un interruttore di emergenza.
 
 ## Struttura del codice

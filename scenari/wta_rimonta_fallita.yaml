@@ -14,7 +14,7 @@ eventi:
     quote:
       A: "1.55/1.56 @ 900/1200"
       B: "2.80/2.82 @ 700/650"
-    volume: 85000
+    volume: 6500
 
   - t: 0
     in_play: true
@@ -26,6 +26,7 @@ eventi:
     quote:
       A: "2.10/2.12 @ 400/350"
       B: "1.90/1.91 @ 380/420"
+    volume: 8200
     nota: Bianchi vince il primo set 6-4
 
   - t: "44:00"
@@ -33,6 +34,7 @@ eventi:
     quote:
       A: "3.40/3.45 @ 30/90"
       B: "1.41/1.42 @ 500/300"
+    volume: 8900
     nota: break di Bianchi
 
   - t: "44:40"
@@ -40,12 +42,14 @@ eventi:
     quote:
       A: "3.45/3.50 @ 140/60"
       B: "1.40/1.41 @ 420/500"
+    volume: 10400
 
   - t: "50:00"
     punteggio: "4-6 1-4"
     quote:
       A: "7.00/7.20 @ 300/200"
       B: "1.16/1.17 @ 900/800"
+    volume: 12300
     nota: secondo break di Bianchi
 
   - t: "1:15:00"

@@ -20,7 +20,8 @@ nome: Rimonta
 quando: set_sotto >= 1 e break_sotto >= 1
 ingresso:
   puntata: 10
-  liquidita_minima: 50
+  liquidita_minima: 10000
+  liquidita_minima_quota: 50
   annulla_non_abbinato_dopo: 15
 """
 # Rossi (A) ha perso il primo set e ha appena perso il servizio nel secondo
@@ -33,13 +34,13 @@ def strategy(text: str) -> Strategy:
     return s
 
 
-def book(a, b, delay=0.0, market_id="1.1"):
-    """Quote di Rossi (a) e Bianchi (b) come (back, € back, lay, € lay)."""
+def book(a, b, delay=0.0, market_id="1.1", volume=20000):
+    """Quote di Rossi (a) e Bianchi (b) come (back, € back, lay, € lay); volume = € abbinati sul mercato."""
     runners = {
         player.selection_id: RunnerBook(player.selection_id, *prices)
         for player, prices in ((ROSSI, a), (BIANCHI, b))
     }
-    return MarketBook(market_id, runners, in_play=True, bet_delay=delay)
+    return MarketBook(market_id, runners, in_play=True, total_matched=volume, bet_delay=delay)
 
 
 class Harness:
@@ -61,11 +62,20 @@ class Harness:
         return any(text in line for line in self.lines)
 
 
-def test_waits_for_liquidity_then_takes_the_best_price():
+def test_waits_for_market_volume():
+    h = Harness(strategy(COMEBACK))
+    h.update(0, book((3.40, 140, 3.45, 90), (1.41, 500, 1.42, 300), volume=8900), DOWN_SET_AND_BREAK)
+    assert h.engine.broker.orders == []
+    assert h.logged("sul mercato sono abbinati solo 8.900 € (minimo 10.000 €)")
+    h.update(10, book((3.45, 140, 3.50, 60), (1.40, 420, 1.41, 500), volume=10400))
+    assert h.fills() == [(ROSSI.selection_id, "BACK", 3.45, 10)]
+
+
+def test_waits_for_liquidity_at_the_best_price():
     h = Harness(strategy(COMEBACK))
     h.update(0, book((3.40, 30, 3.45, 90), (1.41, 500, 1.42, 300)), DOWN_SET_AND_BREAK)
     assert h.engine.broker.orders == []
-    assert h.logged("ci sono solo 30 €")
+    assert h.logged("a 3.40 ci sono solo 30 € (minimo 50 €)")
     h.update(10, book((3.45, 140, 3.50, 60), (1.40, 420, 1.41, 500)))
     assert h.fills() == [(ROSSI.selection_id, "BACK", 3.45, 10)]
 
@@ -94,7 +104,7 @@ def test_order_missed_during_the_delay_is_cancelled_and_retried():
 
 
 def test_partial_fill_then_the_rest_is_cancelled():
-    h = Harness(strategy(COMEBACK.replace("liquidita_minima: 50", "liquidita_minima: 4")))
+    h = Harness(strategy(COMEBACK.replace("liquidita_minima_quota: 50", "liquidita_minima_quota: 4")))
     h.update(0, book((3.40, 6, 3.45, 90), (1.41, 500, 1.42, 300)), DOWN_SET_AND_BREAK)
     assert h.fills() == [(ROSSI.selection_id, "BACK", 3.40, 6)]
     h.update(20, book((3.30, 6, 3.35, 90), (1.43, 500, 1.44, 300)))
@@ -111,7 +121,8 @@ def test_green_exit_locks_the_result():
     assert h.logged("posizione chiusa, risultato garantito +4.85 €")
     [result] = h.engine.settle("1.1", BIANCHI.selection_id, 60)
     assert result.gross == pytest.approx(4.85)
-    assert result.net == pytest.approx(4.85 - 0.24)
+    assert result.commission == pytest.approx(0.22)  # 4,5% di betfair.it
+    assert result.net == pytest.approx(4.63)
 
 
 def test_no_new_entry_while_closing_the_position():

@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 from .context import ENTRY_VARIABLES, EXIT_VARIABLES, POSITION_VARIABLES, VARIABLES
 from .errors import InputError, format_errors, load_yaml
 from .expr import Expression
-from .market import Match
+from .market import Match, eur
 
 _PRICE = re.compile(r"migliore(?:\s*\+\s*(\d+))?")
 _EXIT_ONLY = {
@@ -77,8 +77,10 @@ class Entry(_Section):
     side: Literal["BACK", "LAY"] = Field("BACK", alias="lato")
     price: str = Field("migliore", alias="prezzo")
     """'migliore' = prende la migliore quota; 'migliore+N' = chiede N tick in più e resta in attesa."""
-    min_liquidity: float = Field(0.0, ge=0, alias="liquidita_minima")
-    """€ che devono essere disponibili alla migliore quota per entrare."""
+    min_market_volume: float = Field(0.0, ge=0, alias="liquidita_minima")
+    """€ abbinati in totale sul mercato perché la strategia entri: tiene lontane le partite poco trattate."""
+    min_price_liquidity: float = Field(0.0, ge=0, alias="liquidita_minima_quota")
+    """€ che devono essere disponibili alla migliore quota."""
     stake: float = Field(gt=0, alias="puntata")
     stake_mode: Literal["fissa", "percentuale_bankroll", "responsabilita"] = Field("fissa", alias="tipo_puntata")
     cancel_after: float = Field(10.0, ge=0, alias="annulla_non_abbinato_dopo")
@@ -112,11 +114,12 @@ class Entry(_Section):
             "percentuale_bankroll": f"{self.stake:g}% del bankroll",
             "responsabilita": f"rischio massimo {self.stake:g} €",
         }[self.stake_mode]
-        liquidity = (
-            f", solo se a quella quota ci sono almeno {self.min_liquidity:g} € disponibili"
-            if self.min_liquidity
-            else ""
-        )
+        requirements = []
+        if self.min_market_volume:
+            requirements.append(f"sul mercato sono abbinati almeno {eur(self.min_market_volume)}")
+        if self.min_price_liquidity:
+            requirements.append(f"alla migliore quota ci sono almeno {eur(self.min_price_liquidity)} disponibili")
+        liquidity = f", solo se {' e '.join(requirements)}" if requirements else ""
         entries = "1 ingresso" if self.max_entries == 1 else f"{self.max_entries} ingressi"
         return (
             f"{self.side} sul giocatore che soddisfa la condizione, {price}{liquidity}; "

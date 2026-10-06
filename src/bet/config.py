@@ -16,8 +16,8 @@ class Settings(BaseModel):
     mode: Literal["paper"] = Field("paper", alias="modalita")
     """Per ora solo simulazione; il live arriverà con l'adattatore Betfair."""
     bankroll: float = Field(1000.0, gt=0)
-    commission: float = Field(0.05, ge=0, lt=1, alias="commissione")
-    """Commissione sulle vincite nette di ogni mercato."""
+    commission: float = Field(0.045, ge=0, lt=1, alias="commissione")
+    """Commissione sulle vincite nette di ogni mercato (betfair.it: 4,5%)."""
     min_stake: float = Field(2.0, gt=0, alias="puntata_minima")
     max_exposure: float | None = Field(None, gt=0, alias="esposizione_massima")
     """Perdita massima possibile sommando posizioni aperte e ordini in attesa."""

@@ -44,6 +44,8 @@ def test_defaults(tmp_path):
     assert strategy.entry.side == "BACK"
     assert strategy.entry.improve_ticks == 0
     assert strategy.entry.max_entries == 1
+    assert strategy.entry.min_market_volume == 0
+    assert strategy.entry.min_price_liquidity == 0
     assert strategy.exit is None
     assert strategy.market.circuits == []
 

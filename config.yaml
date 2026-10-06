@@ -1,6 +1,6 @@
-# Impostazioni generali. Valori di esempio: verificali sul tuo conto Betfair.
+# Impostazioni generali per betfair.it. Valori da verificare sul tuo conto.
 modalita: paper            # per ora solo simulazione
 bankroll: 1000             # € di riferimento per tipo_puntata: percentuale_bankroll
-commissione: 0.05          # commissione sulle vincite nette di ogni mercato
-puntata_minima: 2          # € (verifica il minimo del tuo exchange)
+commissione: 0.045         # betfair.it: 4,5% sulle vincite nette di ogni mercato
+puntata_minima: 2          # € (minimo dell'exchange italiano)
 esposizione_massima: 200   # € di perdita massima possibile, sommando posizioni e ordini aperti

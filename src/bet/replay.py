@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 from . import ladder
 from .engine import Engine, Log, Result
 from .errors import InputError, format_errors, load_yaml
-from .market import MarketBook, Match, Player, RunnerBook
+from .market import MarketBook, Match, Player, RunnerBook, eur
 from .tennis import TennisScore, format_score, parse_points, parse_score
 
 Side = Literal["A", "B"]
@@ -245,6 +245,8 @@ def _describe(event: Event, score: TennisScore | None, market: _MarketState, pla
             if p.get("back") is not None:
                 quotes.append(f"{players[side].name} {p['back']:.2f} ({p.get('liq_back', 0):.0f} €)")
         parts.append("quote back " + " | ".join(quotes))
+    if event.volume is not None:
+        parts.append(f"abbinati {eur(event.volume)}")
     if event.stato:
         parts.append(f"mercato {event.stato}")
     if event.nota:
