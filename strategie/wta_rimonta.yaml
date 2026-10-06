@@ -1,0 +1,29 @@
+# La tua idea, così come l'hai descritta:
+# "mi aspetto rimonta in WTA: quando una delle due va sotto di un set e un break,
+#  entra alla migliore quota se la liquidità è almeno X".
+
+nome: Rimonta WTA — sotto di un set e un break
+andamento: >
+  Mi aspetto la rimonta: in WTA chi perde il primo set e va sotto di un break
+  nel secondo viene quotata troppo alta rispetto alle sue reali possibilità.
+
+mercato:
+  circuito: WTA
+  escludi: [ITF, Doubles]
+
+# Controllata a ogni aggiornamento per ciascuna delle due giocatrici:
+# entra su quella per cui è vera. Filtri aggiuntivi possibili, ad esempio:
+#   e favorito_prematch       solo se era la favorita della vigilia
+#   e quota_back <= 6         non oltre una certa quota
+#   e non al_servizio         solo mentre risponde
+quando: set_sotto >= 1 e break_sotto >= 1
+
+ingresso:
+  lato: BACK
+  prezzo: migliore                # prende la migliore quota disponibile
+  liquidita_minima: 50            # € a quella quota; se sono meno aspetta
+  puntata: 10                     # €
+  annulla_non_abbinato_dopo: 15   # secondi
+  max_ingressi_per_match: 1
+
+# Nessuna sezione "uscita": la posizione resta aperta fino alla fine della partita.

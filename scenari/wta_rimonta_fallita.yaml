@@ -1,0 +1,53 @@
+# Stessa partita, ma la rimonta non arriva: la favorita subisce un secondo break e perde.
+
+partita:
+  mercato_id: "1.900000002"
+  evento: Anna Rossi v Bea Bianchi
+  competizione: WTA Tokyo 2026
+  ritardo_inplay: 3
+  giocatori:
+    A: {nome: Anna Rossi, id: 101}
+    B: {nome: Bea Bianchi, id: 102}
+
+eventi:
+  - t: "-10:00"
+    quote:
+      A: "1.55/1.56 @ 900/1200"
+      B: "2.80/2.82 @ 700/650"
+    volume: 85000
+
+  - t: 0
+    in_play: true
+    punteggio: "0-0"
+    servizio: A
+
+  - t: "38:00"
+    punteggio: "4-6 0-0"
+    quote:
+      A: "2.10/2.12 @ 400/350"
+      B: "1.90/1.91 @ 380/420"
+    nota: Bianchi vince il primo set 6-4
+
+  - t: "44:00"
+    punteggio: "4-6 0-2"
+    quote:
+      A: "3.40/3.45 @ 30/90"
+      B: "1.41/1.42 @ 500/300"
+    nota: break di Bianchi
+
+  - t: "44:40"
+    punti: "0-15"
+    quote:
+      A: "3.45/3.50 @ 140/60"
+      B: "1.40/1.41 @ 420/500"
+
+  - t: "50:00"
+    punteggio: "4-6 1-4"
+    quote:
+      A: "7.00/7.20 @ 300/200"
+      B: "1.16/1.17 @ 900/800"
+    nota: secondo break di Bianchi
+
+  - t: "1:15:00"
+    punteggio: "4-6 2-6"
+    vincitore: B

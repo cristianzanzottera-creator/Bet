@@ -1,0 +1,29 @@
+# Variante più selettiva della stessa idea, con un'uscita automatica.
+
+nome: Rimonta WTA — favorita sotto di set e break, con uscita
+andamento: >
+  Come la rimonta base, ma solo sulla favorita della vigilia e senza aspettare
+  la fine: incasso quando il controbreak riporta giù la quota, e limito la
+  perdita se lo svantaggio sale a due break.
+
+mercato:
+  circuito: WTA
+  escludi: [ITF, Doubles]
+
+quando: >
+  set_sotto >= 1 e break_sotto >= 1
+  e favorito_prematch
+  e quota_back <= 6
+
+ingresso:
+  lato: BACK
+  prezzo: migliore
+  liquidita_minima: 100
+  puntata: 2
+  tipo_puntata: percentuale_bankroll   # 2% del bankroll indicato in config.yaml
+  annulla_non_abbinato_dopo: 15
+
+uscita:
+  # pl_green_pct = risultato garantito chiudendo ora, in % della puntata
+  quando: pl_green_pct >= 40 o break_sotto >= 2
+  annulla_non_abbinato_dopo: 10
